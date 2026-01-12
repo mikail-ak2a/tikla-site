@@ -1,43 +1,70 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bana Tıkla</title>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #0f172a;
-      font-family: Arial, Helvetica, sans-serif;
-    }
-    a.button {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 70%;
-      max-width: 600px;
-      height: 120px;
-      background: #2563eb;
-      color: white;
-      text-decoration: none;
-      font-size: 2.2rem;
-      border-radius: 16px;
-      box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    a.button:hover {
-      transform: scale(1.03);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Eğlence Başlasın!</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #282c34;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background 0.5s;
+        }
+        button {
+            padding: 20px 40px;
+            font-size: 24px;
+            cursor: pointer;
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 9px #ff6b81;
+            transition: 0.2s;
+        }
+        button:active {
+            box-shadow: 0 5px #ff6b81;
+            transform: translateY(4px);
+        }
+        #mesaj {
+            margin-top: 30px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
-  <a class="button" href="hosgeldin.html">Bana Tıkla</a>
+    <h1>Büyük Şans Butonu</h1>
+    <button onclick="eglenceyiBaslat()">BANA TIKLA!</button>
+    <div id="mesaj">Bakalım ne olacak?</div>
 
+    <script>
+        const mesajlar = [
+            "Harikasın! 🌟",
+            "Bugün senin günün! 🚀",
+            "Vay canına, bu bir JavaScript büyüsü! ✨",
+            "Tıklamaya devam et, dünya dönüyor! 🌍",
+            "Kod yazmak çok eğlenceli, değil mi? 💻"
+        ];
+
+        function eglenceyiBaslat() {
+            // Rastgele renk değiştir
+            const rastgeleRenk = '#' + Math.floor(Math.random()*16777215).toString(16);
+            document.body.style.backgroundColor = rastgeleRenk;
+
+            // Rastgele mesaj seç
+            const rastgeleMesaj = mesajlar[Math.floor(Math.random() * mesajlar.length)];
+            document.getElementById('mesaj').innerText = rastgeleMesaj;
+            
+            // Butonu biraz salla
+            console.log("Butona tıklandı!");
+        }
+    </script>
 </body>
 </html>
