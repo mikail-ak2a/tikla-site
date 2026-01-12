@@ -2,69 +2,153 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Eğlence Başlasın!</title>
+    <title>Gelişmiş İnteraktif Dünya</title>
     <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+        body, html {
             margin: 0;
-            background-color: #282c34;
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            transition: background 0.5s;
+            padding: 0;
+            overflow: hidden;
+            background: #050505;
+            color: #fff;
+            font-family: 'Arial', sans-serif;
         }
-        button {
-            padding: 20px 40px;
+        canvas {
+            display: block;
+        }
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+            user-select: none;
+        }
+        .score-board {
             font-size: 24px;
-            cursor: pointer;
-            background-color: #ff4757;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            box-shadow: 0 9px #ff6b81;
-            transition: 0.2s;
+            color: #00ffcc;
+            text-shadow: 0 0 10px #00ffcc;
         }
-        button:active {
-            box-shadow: 0 5px #ff6b81;
-            transform: translateY(4px);
-        }
-        #mesaj {
-            margin-top: 30px;
-            font-size: 20px;
-            font-weight: bold;
+        .instructions {
+            font-size: 14px;
+            color: #888;
         }
     </style>
 </head>
 <body>
 
-    <h1>Büyük Şans Butonu</h1>
-    <button onclick="eglenceyiBaslat()">BANA TIKLA!</button>
-    <div id="mesaj">Bakalım ne olacak?</div>
+    <div id="ui">
+        <div class="score-board">Puan: <span id="puan">0</span></div>
+        <p class="instructions">Fareyi hareket ettir ve beliren halkalara tıkla!</p>
+    </div>
+
+    <canvas id="canvas"></canvas>
 
     <script>
-        const mesajlar = [
-            "Harikasın! 🌟",
-            "Bugün senin günün! 🚀",
-            "Vay canına, bu bir JavaScript büyüsü! ✨",
-            "Tıklamaya devam et, dünya dönüyor! 🌍",
-            "Kod yazmak çok eğlenceli, değil mi? 💻"
-        ];
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const puanElementi = document.getElementById('puan');
+        let puan = 0;
 
-        function eglenceyiBaslat() {
-            // Rastgele renk değiştir
-            const rastgeleRenk = '#' + Math.floor(Math.random()*16777215).toString(16);
-            document.body.style.backgroundColor = rastgeleRenk;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-            // Rastgele mesaj seç
-            const rastgeleMesaj = mesajlar[Math.floor(Math.random() * mesajlar.length)];
-            document.getElementById('mesaj').innerText = rastgeleMesaj;
-            
-            // Butonu biraz salla
-            console.log("Butona tıklandı!");
+        let particles = [];
+        let targets = [];
+
+        // Fare koordinatları
+        const mouse = { x: 0, y: 0 };
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+            // Fare hareket ettikçe parçacık ekle
+            for(let i=0; i<2; i++) {
+                particles.push(new Particle(mouse.x, mouse.y));
+            }
+        });
+
+        window.addEventListener('click', (e) => {
+            targets.forEach((target, index) => {
+                const dist = Math.hypot(e.x - target.x, e.y - target.y);
+                if(dist < target.size) {
+                    puan += 10;
+                    puanElementi.innerText = puan;
+                    targets.splice(index, 1);
+                    // Patlama efekti
+                    for(let i=0; i<20; i++) particles.push(new Particle(e.x, e.y, true));
+                }
+            });
+        });
+
+        class Particle {
+            constructor(x, y, explosion = false) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = (Math.random() - 0.5) * (explosion ? 10 : 2);
+                this.speedY = (Math.random() - 0.5) * (explosion ? 10 : 2);
+                this.color = explosion ? '#ff0055' : '#00ffcc';
+                this.alpha = 1;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.alpha -= 0.01;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
         }
+
+        function createTarget() {
+            if(targets.length < 5) {
+                targets.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: 30,
+                    growth: 0.5
+                });
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(5, 5, 5, 0.2)'; // Kuyruk efekti için
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Parçacıkları yönet
+            particles.forEach((p, i) => {
+                p.update();
+                p.draw();
+                if(p.alpha <= 0) particles.splice(i, 1);
+            });
+
+            // Hedefleri yönet
+            targets.forEach((t, i) => {
+                t.size += t.growth;
+                if(t.size > 50 || t.size < 20) t.growth *= -1;
+                
+                ctx.strokeStyle = '#ff0055';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(t.x, t.y, t.size, 0, Math.PI * 2);
+                ctx.stroke();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        setInterval(createTarget, 1000);
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
     </script>
 </body>
 </html>
